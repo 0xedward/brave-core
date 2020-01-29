@@ -79,6 +79,7 @@ extern const char kBinanceRefreshToken[];
 extern const char kBraveGCMChannelStatus[];
 #endif
 extern const char kImportDialogExtensions[];
+extern const char kMRUCyclingEnabled[];
 
 #if defined(OS_ANDROID)
 extern const char kDesktopModeEnabled[];

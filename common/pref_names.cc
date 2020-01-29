@@ -89,6 +89,7 @@ const char kBraveShieldsSettingsVersion[] = "brave.shields_settings_version";
 const char kBraveGCMChannelStatus[] = "brave.gcm.channel_status";
 #endif
 const char kImportDialogExtensions[] = "import_dialog_extensions";
+const char kMRUCyclingEnabled[] = "brave.mru_cycling_enabled";
 
 #if defined(OS_ANDROID)
 const char kDesktopModeEnabled[] = "brave.desktop_mode_enabled";

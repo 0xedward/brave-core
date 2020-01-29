@@ -237,6 +237,9 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
 #endif
 
   RegisterProfilePrefsForMigration(registry);
+
+  // Tab settings
+  registry->RegisterBooleanPref(kMRUCyclingEnabled, false);
 }
 
 }  // namespace brave
