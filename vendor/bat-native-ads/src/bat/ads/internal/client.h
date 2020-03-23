@@ -28,7 +28,7 @@ class Client {
 
   void Initialize(InitializeCallback callback);
 
-  void AppendAdHistoryToAdsShownHistory(
+  void AppendToAdsShownHistory(
       const AdHistory& ad_history);
   std::deque<AdHistory> GetAdsShownHistory() const;
   void AppendToPurchaseIntentSignalHistoryForSegment(
