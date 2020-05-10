@@ -77,6 +77,7 @@ const char kBinanceAccessToken[] = "brave.binance.access_token";
 const char kBinanceRefreshToken[] = "brave.binance.refresh_token";
 const char kAlwaysShowBookmarkBarOnNTP[] =
     "brave.always_show_bookmark_bar_on_ntp";
+const char kMRUCyclingEnabled[] = "brave.mru_cycling_enabled";
 const char kRemoteDebuggingEnabled[] = "brave.remote_debugging_enabled";
 const char kAutocompleteEnabled[] = "brave.autocomplete_enabled";
 const char kTopSiteSuggestionsEnabled[] = "brave.top_site_suggestions_enabled";
@@ -89,7 +90,6 @@ const char kBraveShieldsSettingsVersion[] = "brave.shields_settings_version";
 const char kBraveGCMChannelStatus[] = "brave.gcm.channel_status";
 #endif
 const char kImportDialogExtensions[] = "import_dialog_extensions";
-const char kMRUCyclingEnabled[] = "brave.mru_cycling_enabled";
 
 #if defined(OS_ANDROID)
 const char kDesktopModeEnabled[] = "brave.desktop_mode_enabled";
