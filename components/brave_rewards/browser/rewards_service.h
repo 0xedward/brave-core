@@ -321,6 +321,12 @@ class RewardsService : public KeyedService {
   virtual void GetAllPromotions(
       GetAllPromotionsCallback callback) = 0;
 
+  virtual void DiagnosticLog(
+      const std::string& file,
+      const int line,
+      const int verbose_level,
+      const std::string& message) = 0;
+
  protected:
   base::ObserverList<RewardsServiceObserver> observers_;
 

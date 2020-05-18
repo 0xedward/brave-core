@@ -108,7 +108,7 @@ class BatAdsClientMojoBridge
       const char* file,
       const int line,
       const int verbose_level,
-      const std::string& message) const override;
+      const std::string& message) override;
 
  private:
   bool connected() const;
