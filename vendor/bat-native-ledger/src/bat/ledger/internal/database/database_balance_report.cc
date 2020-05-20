@@ -105,14 +105,17 @@ bool DatabaseBalanceReport::MigrateToV22(
   DCHECK(transaction);
 
   if (!DropTable(transaction, kTableName)) {
+    BLOG(0, "Table couldn't be dropped");
     return false;
   }
 
   if (!CreateTableV22(transaction)) {
+    BLOG(0, "Table couldn't be created");
     return false;
   }
 
   if (!CreateIndexV22(transaction)) {
+    BLOG(0, "Index couldn't be created");
     return false;
   }
 
