@@ -28,12 +28,16 @@
 
 namespace {
 
-class CtrlReleaseHandler : public ui::EventHandler {
+class MRUCyclingEventHandler : public ui::EventHandler,
+                               public views::WidgetObserver {
  public:
-  explicit CtrlReleaseHandler(BraveTabStripModel* model,
-                              BraveBrowserView* browser_view)
-      : model_(model), browser_view_(browser_view) {}
-  ~CtrlReleaseHandler() override = default;
+  explicit MRUCyclingEventHandler(BraveBrowserView* browser_view)
+      : browser_view_(browser_view) {
+    Start();
+  }
+  ~MRUCyclingEventHandler() override {
+    Stop();
+  }
 
  private:
   // ui::EventHandler overrides:
@@ -41,18 +45,7 @@ class CtrlReleaseHandler : public ui::EventHandler {
     if (event->key_code() == ui::VKEY_CONTROL &&
         event->type() == ui::ET_KEY_RELEASED) {
       // Ctrl key was released, stop the MRU cycling
-
-      // Remove event handler
-#if defined(OS_MACOSX)
-      if (browser_view_->GetWidget()->GetRootView())
-        browser_view_->GetWidget()->GetRootView()->RemovePreTargetHandler(this);
-#else
-      if (browser_view_->GetWidget()->GetNativeWindow())
-        browser_view_->GetWidget()->GetNativeWindow()->RemovePreTargetHandler(
-            this);
-#endif
-
-      model_->StopMRUCycling();
+      Stop();
     } else if (!((event->key_code() == ui::VKEY_TAB &&
                   event->type() == ui::ET_KEY_PRESSED) ||
                  (event->key_code() == ui::VKEY_PRIOR &&
@@ -63,11 +56,52 @@ class CtrlReleaseHandler : public ui::EventHandler {
       event->StopPropagation();
     }
   }
+  void OnMouseEvent(ui::MouseEvent* event) override {
+    if (event->IsAnyButton()) {
+      event->StopPropagation();
+      Stop();
+    }
+  }
 
-  BraveTabStripModel* model_;
+  // views::WidgetObserver overrides:
+  void OnWidgetActivationChanged(views::Widget* widget, bool active) override {
+    // We should stop cycling if other application gets active state.
+    if (!active)
+      Stop();
+  }
+
+  void Start() {
+    // Add the event handler
+    auto* widget = browser_view_->GetWidget();
+#if defined(OS_MACOSX)
+    if (widget->GetRootView())
+      widget->GetRootView()->AddPreTargetHandler(this);
+#else
+    if (widget->GetNativeWindow())
+      widget->GetNativeWindow()->AddPreTargetHandler(this);
+#endif
+
+    widget->AddObserver(this);
+  }
+
+  void Stop() {
+    // Remove event handler
+    auto* widget = browser_view_->GetWidget();
+#if defined(OS_MACOSX)
+    if (widget->GetRootView())
+      widget->GetRootView()->RemovePreTargetHandler(this);
+#else
+    if (widget->GetNativeWindow())
+      widget->GetNativeWindow()->RemovePreTargetHandler(this);
+#endif
+
+    widget->RemoveObserver(this);
+    browser_view_->StopMRUCycling();
+  }
+
   BraveBrowserView* browser_view_;
 
-  DISALLOW_COPY_AND_ASSIGN(CtrlReleaseHandler);
+  DISALLOW_COPY_AND_ASSIGN(MRUCyclingEventHandler);
 };
 
 }  // namespace
@@ -76,14 +110,8 @@ BraveBrowserView::BraveBrowserView(std::unique_ptr<Browser> browser)
     : BrowserView(std::move(browser)) {}
 
 BraveBrowserView::~BraveBrowserView() {
-  if (ctrl_released_event_handler_.get()) {
-    // We are still MRU cycling (probably closed the window while cycling)
-    // Disable checks that ensure that the event handler is not registered
-    ui::EventHandler::DisableCheckTargets();
-
-    static_cast<BraveTabStripModel*>(browser()->tab_strip_model())
-        ->StopMRUCycling();
-  }
+  DCHECK(!mru_cycling_event_handler_);
+  mru_cycling_event_handler_.reset();
 }
 
 void BraveBrowserView::SetStarredState(bool is_starred) {
@@ -138,17 +166,11 @@ ShowTranslateBubbleResult BraveBrowserView::ShowTranslateBubble(
 }
 
 void BraveBrowserView::StartMRUCycling() {
-  ctrl_released_event_handler_ = std::make_unique<CtrlReleaseHandler>(
-      static_cast<BraveTabStripModel*>(browser()->tab_strip_model()), this);
+  mru_cycling_event_handler_ = std::make_unique<MRUCyclingEventHandler>(this);
+}
 
-  // Add the event handler
-#if defined(OS_MACOSX)
-  if (GetWidget()->GetRootView())
-    GetWidget()->GetRootView()->AddPreTargetHandler(
-        ctrl_released_event_handler_.get());
-#else
-  if (GetWidget()->GetNativeWindow())
-    GetWidget()->GetNativeWindow()->AddPreTargetHandler(
-        ctrl_released_event_handler_.get());
-#endif
+void BraveBrowserView::StopMRUCycling() {
+  mru_cycling_event_handler_.reset();
+  static_cast<BraveTabStripModel*>(browser()->tab_strip_model())->
+      StopMRUCycling();
 }

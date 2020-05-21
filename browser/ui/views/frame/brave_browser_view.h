@@ -29,8 +29,10 @@ class BraveBrowserView : public BrowserView {
 
   void StartMRUCycling() override;
 
+  void StopMRUCycling();
+
  private:
-  std::unique_ptr<ui::EventHandler> ctrl_released_event_handler_;
+  std::unique_ptr<ui::EventHandler> mru_cycling_event_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(BraveBrowserView);
 };
