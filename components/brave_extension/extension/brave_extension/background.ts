@@ -24,7 +24,8 @@ function promisifyAll (obj: object, list: string[]) {
 promisifyAll(chrome, [
   'browserAction',
   'tabs',
-  'windows'
+  'windows',
+  'commands'
 ])
 
 promisifyAll(chrome.storage, [
@@ -39,3 +40,13 @@ require('./background/store')
 if (chrome.test) {
   chrome.test.sendMessage('brave-extension-enabled')
 }
+
+chrome.commands.onCommand.addListener(function(command) {
+  alert(command);
+  // check if command === 'toggle-brave-shields'
+  // Call chrome.tab.getCurrent() to get current tab
+  // Check if current tab !== undefined
+  // pass tab into getShieldSettingsForTabData
+  // retrieve the braveShields value and pass that into toggleShieldValue
+  // Take the return of the toggleShieldValue and pass it into setAllowBraveShields(rv of toggleShieldValue, tab.origin)
+})
